@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>List Maker</title>
+	<style>
+		body
+		{
+			margin-left: 10%;
+			margin-top: 2%;
+			font-family: sans-serif;
+			width: 75%;
+		}
+
+		hr
+		{
+			color: black;
+			background-color: black;
+			height: 1px;
+			border: 0px none;
+
+		}
+	</style>
+</head>
+<body>
+	
+	
+	<h1 id="ltitle" style="margin-bottom: 0px">New List</h1>
+	<span><a href="javascript:startTitleEdit()" id="ctlink">Change Title</a></span>
+	<br/>
+	<span><a href="javascript:newList()">New List</a></span>
+	<br/>
+	<span><a href="javascript:DoLMPrint()">Print List</a></span>
+	<hr/>
+
+	<p id="noitems" style="text-align: center"><i>No List Items</i></p>
+
+	<ol id="lroot">
+	</ol>
+	<hr/>
+
+	<form action="#" onsubmit="return doAdd()">
+	<label for="nitext">New List Item Text: </label>
+	<input type="text" id="nitext"/>
+	<label for="nicompl">Complete </label>
+	<input type="checkbox" id="nicompl"/>
+	<input type="submit" value="Add"/>
+	</form>
+	<hr/>
+	<span>
+	<h1>Local Storage</h1>
+	<span id="lstorage">
+	<h2>Open List</h2>
+	<span id="olform">
+	</span>
+	<h2>Save List</h2>
+	<span id="slform">
+	<form action="#" onsubmit="return LSSaveList()">
+	<label for="lsfn">List Save Name:</label>
+	<input type="text" id="lsfn"/>
+	<input type="submit" value="Save"/>
+	</form>
+	</span>
+	</span>
+	</span>
+	<hr/>
+	<p><a href="javascript:DoLMAboutBox()"><i>Powered By List Maker HTML v1.0</i></a></p>
+	<p><i>Printing requires that you enable pop-ups on this website.</i></p>
+
+	<!-- About DIV -->
+	<div id="about" style="display: none">
+		<h1>List Maker HTML</h1>
+		<p>A pure HTML and JavaScript web application that allows users to create ordered lists.<br/><b>Version 1.0, By Ian Duncan</b></p>
+		<p><a href="javascript:window.open('https://github.com/jansky/ListMakerHTML')">GitHub</a></p>
+		<h2>License</h2>
+		<p>List Maker HTML is licensed under the MIT license:</p>
+		<textarea rows="10" cols="80" readonly="true">
+The MIT License
+
+Copyright (c) 2014 Ian Duncan
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+		</textarea>
+
+	</div>
+</body>
+<script>
+if(!Array.prototype.forEach){Array.prototype.forEach=function(callback,thisArg){var T,k;if(this==null){throw new TypeError(" this is null or not defined")}var O=Object(this);var len=O.length>>>0;if(typeof callback!=="function"){throw new TypeError(callback+" is not a function")}if(arguments.length>1){T=thisArg}k=0;while(k<len){var kValue;if(k in O){kValue=O[k];callback.call(T,kValue,k,O)}k++}}}Array.prototype.move=function(pos1,pos2){var i,tmp;pos1=parseInt(pos1,10);pos2=parseInt(pos2,10);if(pos1!==pos2&&0<=pos1&&pos1<=this.length&&0<=pos2&&pos2<=this.length){tmp=this[pos1];if(pos1<pos2){for(i=pos1;i<pos2;i++){this[i]=this[i+1]}}else{for(i=pos1;i>pos2;i--){this[i]=this[i-1]}}this[pos2]=tmp}};if(!window.localStorage){window.localStorage={getItem:function(sKey){if(!sKey||!this.hasOwnProperty(sKey)){return null}return unescape(document.cookie.replace(new RegExp("(?:^|.*;\\s*)"+escape(sKey).replace(/[\-\.\+\*]/g,"\\$&")+"\\s*\\=\\s*((?:[^;](?!;))*[^;]?).*"),"$1"))},key:function(nKeyId){return unescape(document.cookie.replace(/\s*\=(?:.(?!;))*$/,"").split(/\s*\=(?:[^;](?!;))*[^;]?;\s*/)[nKeyId])},setItem:function(sKey,sValue){if(!sKey){return}document.cookie=escape(sKey)+"="+escape(sValue)+"; expires=Tue, 19 Jan 2038 03:14:07 GMT; path=/";this.length=document.cookie.match(/\=/g).length},length:0,removeItem:function(sKey){if(!sKey||!this.hasOwnProperty(sKey)){return}document.cookie=escape(sKey)+"=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";this.length--},hasOwnProperty:function(sKey){return(new RegExp("(?:^|;\\s*)"+escape(sKey).replace(/[\-\.\+\*]/g,"\\$&")+"\\s*\\=")).test(document.cookie)}};window.localStorage.length=(document.cookie.match(/\=/g)||window.localStorage).length}if(typeof JSON!=="object"){JSON={}}(function(){function f(n){return n<10?"0"+n:n}if(typeof Date.prototype.toJSON!=="function"){Date.prototype.toJSON=function(){return isFinite(this.valueOf())?this.getUTCFullYear()+"-"+f(this.getUTCMonth()+1)+"-"+f(this.getUTCDate())+"T"+f(this.getUTCHours())+":"+f(this.getUTCMinutes())+":"+f(this.getUTCSeconds())+"Z":null};String.prototype.toJSON=Number.prototype.toJSON=Boolean.prototype.toJSON=function(){return this.valueOf()}}var cx,escapable,gap,indent,meta,rep;function quote(string){escapable.lastIndex=0;return escapable.test(string)?'"'+string.replace(escapable,function(a){var c=meta[a];return typeof c==="string"?c:"\\u"+("0000"+a.charCodeAt(0).toString(16)).slice(-4)})+'"':'"'+string+'"'}function str(key,holder){var i,k,v,length,mind=gap,partial,value=holder[key];if(value&&typeof value==="object"&&typeof value.toJSON==="function"){value=value.toJSON(key)}if(typeof rep==="function"){value=rep.call(holder,key,value)}switch(typeof value){case"string":return quote(value);case"number":return isFinite(value)?String(value):"null";case"boolean":case"null":return String(value);case"object":if(!value){return"null"}gap+=indent;partial=[];if(Object.prototype.toString.apply(value)==="[object Array]"){length=value.length;for(i=0;i<length;i+=1){partial[i]=str(i,value)||"null"}v=partial.length===0?"[]":gap?"[\n"+gap+partial.join(",\n"+gap)+"\n"+mind+"]":"["+partial.join(",")+"]";gap=mind;return v}if(rep&&typeof rep==="object"){length=rep.length;for(i=0;i<length;i+=1){if(typeof rep[i]==="string"){k=rep[i];v=str(k,value);if(v){partial.push(quote(k)+(gap?": ":":")+v)}}}}else{for(k in value){if(Object.prototype.hasOwnProperty.call(value,k)){v=str(k,value);if(v){partial.push(quote(k)+(gap?": ":":")+v)}}}}v=partial.length===0?"{}":gap?"{\n"+gap+partial.join(",\n"+gap)+"\n"+mind+"}":"{"+partial.join(",")+"}";gap=mind;return v}}if(typeof JSON.stringify!=="function"){escapable=/[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g;meta={"\b":"\\b","\t":"\\t","\n":"\\n","\f":"\\f","\r":"\\r",'"':'\\"',"\\":"\\\\"};JSON.stringify=function(value,replacer,space){var i;gap="";indent="";if(typeof space==="number"){for(i=0;i<space;i+=1){indent+=" "}}else{if(typeof space==="string"){indent=space}}rep=replacer;if(replacer&&typeof replacer!=="function"&&(typeof replacer!=="object"||typeof replacer.length!=="number")){throw new Error("JSON.stringify")}return str("",{"":value})}}if(typeof JSON.parse!=="function"){cx=/[\u0000\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g;JSON.parse=function(text,reviver){var j;function walk(holder,key){var k,v,value=holder[key];if(value&&typeof value==="object"){for(k in value){if(Object.prototype.hasOwnProperty.call(value,k)){v=walk(value,k);if(v!==undefined){value[k]=v}else{delete value[k]}}}}return reviver.call(holder,key,value)}text=String(text);cx.lastIndex=0;if(cx.test(text)){text=text.replace(cx,function(a){return"\\u"+("0000"+a.charCodeAt(0).toString(16)).slice(-4)})}if(/^[\],:{}\s]*$/.test(text.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,"@").replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,"]").replace(/(?:^|:|,)(?:\s*\[)+/g,""))){j=eval("("+text+")");return typeof reviver==="function"?walk({"":j},""):j}throw new SyntaxError("JSON.parse")}}}());var List=function(){this.name="";this.author="";this.desc="";this.items=[]};var ListItem=function(t,c){this.text=t;this.completed=c};List.prototype.AddItem=function(li){this.items[this.items.length]=li};List.prototype.RemoveItem=function(liid){this.items.splice(liid,1)};List.prototype.ReplaceItem=function(liid,newli){this.items[liid]=newli};List.prototype.GetNumListItems=function(liid,newli){return this.items.length};List.prototype.InitializeWithListData=function(n,a,d,i){name=n;author=a;desc=d;items=i};var root;var LMList=new List();var w=null;function ClearElement(e){while(e.firstChild){e.removeChild(e.firstChild)}}function ChangeLMListTitle(newtitle){LMList.name=newtitle}function InitList(u){root=document.getElementById(u);LMList.name="New List"}function LoadListFromJSON(j){LMList=new List();var listLiteral=JSON.parse(j);for(var prop in listLiteral){LMList[prop]=listLiteral[prop]}UpdateLMListDisplay()}function GetJSONFromList(){return JSON.stringify(LMList)}function BoolToStr(b){if(b){return"true"}else{return"false"}}function AddListItemToULList(element,index,array){var li=document.createElement("li");var c=document.createElement("input");var s=document.createElement("span");var s2=document.createElement("span");var editLink=document.createElement("a");var removeLink=document.createElement("a");var moveUpLink=document.createElement("a");var moveDownLink=document.createElement("a");li.setAttribute("id",index);c.setAttribute("type","checkbox");c.setAttribute("id","check"+index);c.setAttribute("onchange","checkChange("+index+")");s.innerHTML=element.text;s.setAttribute("id","text"+index);c.checked=element.completed;s.style.marginLeft="3px";editLink.setAttribute("href","javascript:startEdit("+index+")");editLink.innerHTML="Edit";removeLink.setAttribute("href","javascript:RemoveLMListItem("+index+")");removeLink.innerHTML="Remove";removeLink.style.marginLeft="5px";moveUpLink.setAttribute("href","javascript:moveUp("+index+")");moveUpLink.innerHTML="&uarr;";moveUpLink.style.marginLeft="5px";moveDownLink.setAttribute("href","javascript:moveDown("+index+")");moveDownLink.innerHTML="&darr;";moveDownLink.style.marginLeft="5px";s2.setAttribute("id","links"+index);s2.style.marginLeft="20px";s2.appendChild(editLink);s2.appendChild(removeLink);s2.appendChild(moveUpLink);s2.appendChild(moveDownLink);li.appendChild(c);li.appendChild(s);li.appendChild(s2);root.appendChild(li)}function DoLMAboutBox(){var w=window.open("","","width=700,height=400,scrollbars");w.document.write(document.getElementById("about").innerHTML);w.document.body.style.fontFamily="sans-serif";w.document.title="About List Maker HTML";w.document.close()}function DoLMPrint(){var w=window.open("","","width=400,height=400,resizeable,scrollbars");var ol=document.createElement("ol");var h1=document.createElement("h1");h1.innerHTML=LMList.name;LMList.items.forEach(function(element,index,array){var li=document.createElement("li");var c=document.createElement("input");var s=document.createElement("span");li.setAttribute("id",index);c.setAttribute("type","checkbox");s.innerHTML=element.text;c.checked=element.completed;s.style.marginLeft="3px";li.appendChild(c);li.appendChild(s);ol.appendChild(li)});w.document.body.appendChild(h1);w.document.body.appendChild(ol);w.document.body.style.fontFamily="sans-serif";w.document.title=LMList.name;w.print();w.document.close()}function UpdateLMListDisplay(){while(root.firstChild){root.removeChild(root.firstChild)}LMList.items.forEach(AddListItemToULList);if(LMList.GetNumListItems()>0){document.getElementById("noitems").style.display="none"}else{document.getElementById("noitems").style.display="block"}var title=document.getElementById("ltitle");ClearElement(title);title.innerHTML=LMList.name;document.title=LMList.name+" - List Maker"}function RemoveLMListItem(itemid){LMList.RemoveItem(itemid);UpdateLMListDisplay()}function AddLMListItem(itemtext,completed){var li=new ListItem(itemtext,completed);LMList.AddItem(li);UpdateLMListDisplay()}function EditLMListItem(itemid,itemtext,completed){var li=new ListItem(itemtext,completed);LMList.ReplaceItem(itemid,li);UpdateLMListDisplay()}function LSIterate(callback){for(var i=0,len=localStorage.length;i<len;++i){callback.call(this,localStorage.key(i))}}function LSSaveList(){var key=document.getElementById("lsfn").value;if(key!=""){var keyAlreadyExists=false;var willSave=true;LSIterate(function(k){if(k==key){keyAlreadyExists=true}});if(keyAlreadyExists){if(!confirm("A list has been saved with that save name already. Overwrite it?")){willSave=false}}if(willSave){localStorage.setItem(key,GetJSONFromList());var listSaved=false;LSIterate(function(k){if(k==key){listSaved=true}});if(listSaved){alert("List saved")}else{alert("The list was not able to be saved")}ClearElement(document.getElementById("olform"));LSOpenListForm()}}return false}function LSOpenList(){var key=document.getElementById("lsopensel").value;var json=localStorage.getItem(key);LoadListFromJSON(json);document.getElementById("lsfn").value=key;return false}function LSDeleteList(){var key=document.getElementById("lsopensel").value;if(confirm("Really Delete '"+key+"'?")){localStorage.removeItem(key);var listDeleted=true;LSIterate(function(k){if(k==key){listDeleted=false}});if(listDeleted){alert("List deleted")}else{alert("The list was not able to be deleted")}ClearElement(document.getElementById("olform"));LSOpenListForm()}}function LSOpenListForm(){var form=document.createElement("form");form.setAttribute("action","#");form.setAttribute("onsubmit","return LSOpenList()");var slabel=document.createElement("label");slabel.setAttribute("for","lsopensel");var select=document.createElement("select");select.setAttribute("id","lsopensel");LSIterate(function(key){var option=document.createElement("option");option.setAttribute("value",key);option.innerHTML=key;select.appendChild(option)});var submit=document.createElement("input");submit.setAttribute("type","submit");submit.setAttribute("value","Open");var del=document.createElement("input");del.setAttribute("type","button");del.setAttribute("onclick","LSDeleteList()");del.setAttribute("value","Delete List");del.style.marginLeft="20px";del.style.color="red";form.appendChild(slabel);form.appendChild(select);form.appendChild(submit);form.appendChild(del);document.getElementById("olform").appendChild(form)}InitList("lroot");LSOpenListForm();function newList(){LMList=new List();LMList.name="New List";var title=document.getElementById("ltitle");ClearElement(title);title.innerHTML=LMList.name;document.getElementById("ctlink").setAttribute("href","javascript:startTitleEdit()");UpdateLMListDisplay()}function moveUp(id){var oldindex=id;var newindex=id-1;if(newindex>-1){LMList.items.move(oldindex,newindex);UpdateLMListDisplay()}}function moveDown(id){var oldindex=id;var newindex=id+1;if(oldindex<(LMList.items.length-1)){LMList.items.move(oldindex,newindex);UpdateLMListDisplay()}}function doAdd(){var text=document.getElementById("nitext").value;var completed=document.getElementById("nicompl").checked;AddLMListItem(text,completed);document.getElementById("nitext").value="";document.getElementById("nicompl").checked=false;return false}function doTitleEdit(){var ttext=document.getElementById("tedit").value;ChangeLMListTitle(ttext);var title=document.getElementById("ltitle");ClearElement(title);title.innerHTML=LMList.name;document.getElementById("ctlink").setAttribute("href","javascript:startTitleEdit()");document.title=LMList.name+" - List Maker";return false}function startTitleEdit(){var title=document.getElementById("ltitle");document.getElementById("ctlink").setAttribute("href","javascript:void(0)");var ttext=title.innerHTML;title.innerHTML="";ClearElement(title);var form=document.createElement("form");form.setAttribute("action","#");form.setAttribute("onsubmit","return doTitleEdit()");var tinput=document.createElement("input");tinput.setAttribute("type","text");tinput.setAttribute("id","tedit");tinput.setAttribute("value",ttext);var submit=document.createElement("input");submit.setAttribute("type","submit");submit.setAttribute("value","Change");form.appendChild(tinput);form.appendChild(submit);title.appendChild(form)}function checkChange(id){var text=document.getElementById("text"+String(id)).innerHTML;var completed=document.getElementById("check"+String(id)).checked;EditLMListItem(id,text,completed)}function doEdit(id){var text=document.getElementById("edit"+String(id)).value;var completed=document.getElementById("check"+String(id)).checked;EditLMListItem(id,text,completed);return false}function startEdit(id){var li=document.getElementById(String(id));var span=document.getElementById("text"+String(id));var links=document.getElementById("links"+String(id));ClearElement(links);var text=span.innerHTML;span.innerHTML="";var form=document.createElement("form");form.setAttribute("action","#");form.setAttribute("onsubmit","return doEdit("+String(id)+")");var tinput=document.createElement("input");tinput.setAttribute("type","text");tinput.setAttribute("id","edit"+String(id));tinput.setAttribute("value",text);var submit=document.createElement("input");submit.setAttribute("type","submit");submit.setAttribute("value","Edit");form.appendChild(tinput);form.appendChild(submit);span.appendChild(form)}if(typeof(Storage)!=="undefined"){}else{document.getElementById("lstorage").innerHTML="<p><i>Local Storage or the fallback is not supported by your web browser.</i></p>"};
+</script>
+</html>
