@@ -21,6 +21,11 @@ Compatibility
 
 List Maker HTML includes polyfills for JSON parsing, array.forEach, and local storage (using cookies).
 
+Try It
+------
+
+You can try List Maker HTML at http://git.io/listmakerhtml
+
 
 
 
