@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>List Maker</title>
+	<style>
+		body
+		{
+			margin-left: 10%;
+			margin-top: 2%;
+			font-family: sans-serif;
+			width: 75%;
+		}
+
+		hr
+		{
+			color: black;
+			background-color: black;
+			height: 1px;
+			border: 0px none;
+
+		}
+	</style>
+</head>
+<body>
+	
+	
+	<h1 id="ltitle" style="margin-bottom: 0px">New List</h1>
+	<span><a href="javascript:startTitleEdit()" id="ctlink">Change Title</a></span>
+	<br/>
+	<span><a href="javascript:newList()">New List</a></span>
+	<br/>
+	<span><a href="javascript:DoLMPrint()">Print List</a></span>
+	<hr/>
+
+	<p id="noitems" style="text-align: center"><i>No List Items</i></p>
+
+	<ol id="lroot">
+	</ol>
+	<hr/>
+
+	<form action="#" onsubmit="return doAdd()">
+	<label for="nitext">New List Item Text: </label>
+	<input type="text" id="nitext"/>
+	<label for="nicompl">Complete </label>
+	<input type="checkbox" id="nicompl"/>
+	<input type="submit" value="Add"/>
+	</form>
+	<hr/>
+	<span>
+	<h1>Local Storage</h1>
+	<span id="lstorage">
+	<h2>Open List</h2>
+	<span id="olform">
+	</span>
+	<h2>Save List</h2>
+	<span id="slform">
+	<form action="#" onsubmit="return LSSaveList()">
+	<label for="lsfn">List Save Name:</label>
+	<input type="text" id="lsfn"/>
+	<input type="submit" value="Save"/>
+	</form>
+	</span>
+	</span>
+	</span>
+	<hr/>
+	<p><a href="javascript:DoLMAboutBox()"><i>Powered By List Maker HTML v1.0</i></a></p>
+	<p><i>Printing requires that you enable pop-ups on this website.</i></p>
+
+	<!-- About DIV -->
+	<div id="about" style="display: none">
+		<h1>List Maker HTML</h1>
+		<p>A pure HTML and JavaScript web application that allows users to create ordered lists.<br/><b>Version 1.0, By Ian Duncan</b></p>
+		<p><a href="javascript:window.open('https://github.com/jansky/ListMakerHTML')">GitHub</a></p>
+		<h2>License</h2>
+		<p>List Maker HTML is licensed under the MIT license:</p>
+		<textarea rows="10" cols="80" readonly="true">
+The MIT License
+
+Copyright (c) 2014 Ian Duncan
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+		</textarea>
+
+	</div>
+</body>
+<!-- Scripts -->
+<script src="json2.js"></script>
+<script src="list.js"></script>
+<script src="polyfill.js"></script>
+<script src="lmapp.js"></script>
+<script src="storage.js"></script>
+
+<script>
+InitList("lroot");
+LSOpenListForm();
+
+function newList()
+{
+	LMList = new List();
+	LMList.name = "New List";
+
+	var title = document.getElementById("ltitle");
+	ClearElement(title);
+
+	title.innerHTML = LMList.name;
+
+	document.getElementById("ctlink").setAttribute("href", "javascript:startTitleEdit()");
+
+	UpdateLMListDisplay();
+}
+
+function moveUp(id)
+{
+	var oldindex = id;
+	var newindex = id - 1;
+
+
+
+	if(newindex > -1)
+	{
+
+		LMList.items.move(oldindex, newindex);
+		UpdateLMListDisplay();
+	}
+}
+
+function moveDown(id)
+{
+	var oldindex = id;
+	var newindex = id + 1;
+
+	if(oldindex < (LMList.items.length - 1))
+	{
+		
+		LMList.items.move(oldindex, newindex);
+		UpdateLMListDisplay();
+	}
+}
+
+
+
+function doAdd()
+{
+	var text = document.getElementById("nitext").value;
+
+	var completed = document.getElementById("nicompl").checked;
+
+	AddLMListItem(text, completed)
+
+	document.getElementById("nitext").value = "";
+	document.getElementById("nicompl").checked = false;
+
+	//prevent form submission
+	return false;
+}
+
+function doTitleEdit()
+{
+	var ttext = document.getElementById("tedit").value;
+
+	ChangeLMListTitle(ttext);
+
+	var title = document.getElementById("ltitle");
+	ClearElement(title);
+
+	title.innerHTML = LMList.name;
+	document.getElementById("ctlink").setAttribute("href", "javascript:startTitleEdit()");
+
+	document.title = LMList.name + " - List Maker";
+
+	//prevent form submission
+	return false;
+}
+
+function startTitleEdit()
+{
+	var title = document.getElementById("ltitle");
+	document.getElementById("ctlink").setAttribute("href", "javascript:void(0)");
+
+	var ttext = title.innerHTML;
+	title.innerHTML = "";
+
+	ClearElement(title);
+
+	var form = document.createElement("form");
+	form.setAttribute("action", "#");
+	form.setAttribute("onsubmit", "return doTitleEdit()")
+
+
+	var tinput = document.createElement("input");
+	tinput.setAttribute("type", "text");
+	tinput.setAttribute("id", "tedit");
+	tinput.setAttribute("value", ttext);
+	
+	var submit = document.createElement("input");
+	submit.setAttribute("type", "submit");
+	submit.setAttribute("value", "Change");
+
+	form.appendChild(tinput);
+	form.appendChild(submit);
+
+	title.appendChild(form);
+}
+
+function checkChange(id)
+{
+	var text = document.getElementById("text" + String(id)).innerHTML;
+	var completed = document.getElementById("check" + String(id)).checked;
+
+	EditLMListItem(id, text, completed);
+}
+
+function doEdit(id)
+{
+
+	var text = document.getElementById("edit" + String(id)).value;
+	var completed = document.getElementById("check" + String(id)).checked;
+
+	EditLMListItem(id, text, completed);
+
+	 //prevent form submission
+	 return false;
+}
+
+function startEdit(id)
+{
+	var li = document.getElementById(String(id));
+
+	var span = document.getElementById("text" + String(id));
+	var links = document.getElementById("links" + String(id));
+
+	//prevent people from starting editing while editing
+	ClearElement(links);
+
+
+	var text = span.innerHTML;
+	span.innerHTML = "";
+
+	var form = document.createElement("form");
+	form.setAttribute("action", "#");
+	form.setAttribute("onsubmit", "return doEdit(" + String(id) + ")")
+
+	var tinput = document.createElement("input");
+	tinput.setAttribute("type", "text");
+	tinput.setAttribute("id", "edit" + String(id));
+	tinput.setAttribute("value", text);
+	
+	var submit = document.createElement("input");
+	submit.setAttribute("type", "submit");
+	submit.setAttribute("value", "Edit");
+
+	form.appendChild(tinput);
+	form.appendChild(submit);
+
+	span.appendChild(form);
+
+
+
+
+}
+
+//If there's no local storage, disable the local storage panel
+
+if(typeof(Storage) !== "undefined") {
+    // Code for localStorage/sessionStorage.
+} else {
+    document.getElementById("lstorage").innerHTML = "<p><i>Local Storage or the fallback is not supported by your web browser.</i></p>";
+}
+</script>
+</html>
