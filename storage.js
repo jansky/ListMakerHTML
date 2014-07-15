@@ -8,6 +8,8 @@ lmapp.js
 list.js
 */
 
+
+
 function LSIterate(callback)
 {
 	for ( var i = 0, len = localStorage.length; i < len; ++i )
@@ -65,6 +67,10 @@ function LSSaveList()
 			//Update the open list form
 			ClearElement(document.getElementById("olform"));
 			LSOpenListForm();
+
+			window.location.hash = encodeURIComponent(key);
+			
+
 		}
 	}
 
@@ -75,15 +81,38 @@ function LSOpenList()
 {
 	var key = document.getElementById("lsopensel").value;
 
-	var json = localStorage.getItem(key);
+	if(key != "" || key != undefined)
+	{
 
-	LoadListFromJSON(json);
+		var json = localStorage.getItem(key);
 
-	document.getElementById("lsfn").value = key;
+		LoadListFromJSON(json);
+
+		document.getElementById("lsfn").value = key;
+
+		window.location.hash = encodeURIComponent(key);
+		
+	}
 
 	return false;
 
 
+}
+
+function LSOpenListFromKey(key)
+{
+	if(key != "" || key != undefined)
+	{
+
+		var json = localStorage.getItem(key);
+
+		LoadListFromJSON(json);
+
+		document.getElementById("lsfn").value = key;
+
+		window.location.hash = encodeURIComponent(key);
+		
+	}
 }
 
 function LSDeleteList()
@@ -122,6 +151,8 @@ function LSDeleteList()
 
 function LSOpenListForm()
 {
+	if(localStorage.length > 0)
+	{
 	var form = document.createElement("form");
 	form.setAttribute("action", "#");
 	form.setAttribute("onsubmit", "return LSOpenList()");
@@ -159,4 +190,71 @@ function LSOpenListForm()
 	form.appendChild(del);
 
 	document.getElementById("olform").appendChild(form);
+	}
+	else
+	{
+		var i = document.createElement("i");
+		i.innerHTML = "No saved lists."
+		document.getElementById("olform").appendChild(i);
+	}
+}
+
+function JLShowExportDialog()
+{
+	var w = window.open('', '', 'width=400,height=400,scrollbars');
+
+	var h1 = document.createElement("h1");
+	h1.innerHTML = "Export To JSON";
+
+	var p = document.createElement("p");
+	p.innerHTML = "The text in the box below contains the JSON.";
+
+	var textarea = document.createElement("textarea");
+	textarea.value = GetJSONFromList();
+	textarea.setAttribute("rows", "10");
+	textarea.setAttribute("cols", "45");
+
+	w.document.body.appendChild(h1);
+	w.document.body.appendChild(p);
+	w.document.body.appendChild(textarea);
+
+	
+	w.document.body.style.fontFamily = "sans-serif";
+	
+	w.document.title = "Export List To JSON";
+	w.document.close();
+}
+
+function JLShowImportDialog()
+{
+	var w = window.open('', '', 'width=400,height=400,scrollbars');
+
+	var h1 = document.createElement("h1");
+	h1.innerHTML = "Import List From JSON";
+
+	var p = document.createElement("p");
+	p.innerHTML = "Paste the list JSON into the box below and click 'Import'.";
+
+	var textarea = document.createElement("textarea");
+	
+	textarea.setAttribute("rows", "10");
+	textarea.setAttribute("cols", "45");
+	textarea.setAttribute("id", "json");
+
+	var button = document.createElement("input");
+	button.setAttribute("value", "Import");
+	button.setAttribute("onclick", "var j = document.getElementById('json').value; window.opener.LoadListFromJSON(j)");
+	button.setAttribute("type", "button");
+
+	w.document.body.appendChild(h1);
+	w.document.body.appendChild(p);
+	w.document.body.appendChild(textarea);
+	w.document.body.appendChild(document.createElement("br"));
+	w.document.body.appendChild(button);
+
+	
+	w.document.body.style.fontFamily = "sans-serif";
+	
+	w.document.title = "Import List From JSON";
+	w.document.close();
 }

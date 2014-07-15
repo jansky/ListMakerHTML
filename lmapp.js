@@ -40,6 +40,8 @@ function LoadListFromJSON(j)
     	LMList[prop] = listLiteral[prop];
 
 	UpdateLMListDisplay();
+
+	window.location.hash = "";
 }
 
 function GetJSONFromList()
@@ -69,12 +71,33 @@ function AddListItemToULList(element, index, array)
 	var removeLink = document.createElement("a");
 	var moveUpLink = document.createElement("a");
 	var moveDownLink = document.createElement("a");
+	var boldLink = document.createElement("a");
+	var italicLink = document.createElement("a");
+	var urgentLink = document.createElement("a");
 	li.setAttribute("id", index);
 	c.setAttribute("type", "checkbox");
 	c.setAttribute("id", "check" + index);
 	c.setAttribute("onchange", "checkChange(" + index + ")");
 	s.innerHTML = element.text;
 	s.setAttribute("id", "text" + index);
+
+	//Bold, Italics, Urgent
+
+	if(element.bold)
+	{
+		s.style.fontWeight = "bold";
+	}
+	
+	if(element.italic)
+	{
+		s.style.fontStyle = "italic";
+	}
+
+	if(element.urgent)
+	{
+		s.style.color = "red";
+	}
+
 	c.checked = element.completed;
 	s.style.marginLeft = "3px";
 
@@ -93,16 +116,37 @@ function AddListItemToULList(element, index, array)
 	moveDownLink.innerHTML = "&darr;";
 	moveDownLink.style.marginLeft = "5px";
 
+	boldLink.setAttribute("href", "javascript:doBold(" + index + ")");
+	boldLink.innerHTML = "Bold";
+	boldLink.style.marginLeft = "5px";
+	boldLink.style.fontWeight = "bold";
+
+	italicLink.setAttribute("href", "javascript:doItalic(" + index + ")");
+	italicLink.innerHTML = "Italic";
+	italicLink.style.marginLeft = "5px";
+	italicLink.style.fontStyle = "italic";
+
+	urgentLink.setAttribute("href", "javascript:doUrgent(" + index + ")");
+	urgentLink.innerHTML = "Urgent";
+	urgentLink.style.marginLeft = "5px";
+	urgentLink.style.color = "red";
+
 
 	s2.setAttribute("id", "links" + index);
-	s2.style.marginLeft = "20px";
+	s2.style.marginLeft = "50px";
+	s2.style.display = "none";
 	s2.appendChild(editLink);
 	s2.appendChild(removeLink);
+	s2.appendChild(urgentLink);
+	s2.appendChild(boldLink);
+	s2.appendChild(italicLink);
 	s2.appendChild(moveUpLink);
 	s2.appendChild(moveDownLink);
 	
 
-
+	li.setAttribute("onmouseover", "doControlShow(" + index + ")");
+	li.setAttribute("onmouseout", "doControlHide(" + index + ")");
+	li.setAttribute("ondblclick", "startEdit(" + index + ")");
 	li.appendChild(c);
 	li.appendChild(s);
 	li.appendChild(s2);
@@ -218,3 +262,4 @@ function EditLMListItem(itemid, itemtext, completed)
 	LMList.ReplaceItem(itemid, li);
 	UpdateLMListDisplay();
 }
+

@@ -20,12 +20,18 @@
 			border: 0px none;
 
 		}
+
+		li
+		{
+			padding-top: 5px;
+			padding-bottom: 5px;
+		}
 	</style>
 </head>
 <body>
 	
 	
-	<h1 id="ltitle" style="margin-bottom: 0px">New List</h1>
+	<h1 id="ltitle" style="margin-bottom: 0px" ondblclick="startTitleEdit()">New List</h1>
 	<span><a href="javascript:startTitleEdit()" id="ctlink">Change Title</a></span>
 	<br/>
 	<span><a href="javascript:newList()">New List</a></span>
@@ -47,13 +53,16 @@
 	<input type="submit" value="Add"/>
 	</form>
 	<hr/>
-	<span>
-	<h1>Local Storage</h1>
+	<div style="float: right"><a href="javascript:spHideShow()" id="spnotify">Show Storage Panel (So You Can Save / Open Lists)</a></div>
+	<br/>
+	<span id="storagepanel" style="display: none">
+	<h2>Local Storage</h2>
+	<p>Local Storage allows you to save lists using your web browser. In order to retrieve your lists you will have to open them with the same web browser that you used to save them.</p>
 	<span id="lstorage">
-	<h2>Open List</h2>
+	<h3>Open List</h3>
 	<span id="olform">
 	</span>
-	<h2>Save List</h2>
+	<h3>Save List</h3>
 	<span id="slform">
 	<form action="#" onsubmit="return LSSaveList()">
 	<label for="lsfn">List Save Name:</label>
@@ -62,15 +71,25 @@
 	</form>
 	</span>
 	</span>
+	<h2>Export / Import From JSON</h2>
+	<p>You can export your list to JSON and import JSON.</p>
+	<p><b>Tip:</b> To save lists for use on other computers, click 'Export List JSON', copying the JSON contents in the box, pasting it into Notepad or another text editor, and save it as a file. To load it, just open up the file, copy its contents, load List Maker HTML, click 'Import List JSON', paste it into the box, and click 'Import'.</p>
+	<p>
+	<input type="button" onclick="JLShowExportDialog()" value="Export List JSON"/>
+	<br/>
+	<input type="button" onclick="JLShowImportDialog()" value="Import List JSON"/>
+	</p>
 	</span>
 	<hr/>
-	<p><a href="javascript:DoLMAboutBox()"><i>Powered By List Maker HTML v1.0</i></a></p>
+	<p><a href="javascript:DoLMAboutBox()"><i>Powered By List Maker HTML v1.5</i></a></p>
 	<p><i>Printing requires that you enable pop-ups on this website.</i></p>
+	</span>
+	
 
 	<!-- About DIV -->
 	<div id="about" style="display: none">
 		<h1>List Maker HTML</h1>
-		<p>A pure HTML and JavaScript web application that allows users to create ordered lists.<br/><b>Version 1.0, By Ian Duncan</b></p>
+		<p>A pure HTML and JavaScript web application that allows users to create ordered lists.<br/><b>Version 1.5, By Ian Duncan</b></p>
 		<p><a href="javascript:window.open('https://github.com/jansky/ListMakerHTML')">GitHub</a></p>
 		<h2>License</h2>
 		<p>List Maker HTML is licensed under the MIT license:</p>
@@ -99,6 +118,8 @@ THE SOFTWARE.
 		</textarea>
 
 	</div>
+
+
 </body>
 <!-- Scripts -->
 <script src="json2.js"></script>
@@ -106,15 +127,37 @@ THE SOFTWARE.
 <script src="polyfill.js"></script>
 <script src="lmapp.js"></script>
 <script src="storage.js"></script>
+<script src="undoredo.js"></script>
 
 <script>
 InitList("lroot");
-LSOpenListForm();
+
+
+var editing = null;
+
+function spHideShow()
+{
+	var sp = document.getElementById("storagepanel");
+	var spnotify = document.getElementById("spnotify");
+
+	if(sp.style.display == "none")
+	{
+		//Show
+		sp.style.display = "inline";
+		spnotify.innerHTML = "Hide Storage Panel";
+	}
+	else
+	{
+		sp.style.display = "none";
+		spnotify.innerHTML = "Show Storage Panel (So You Can Save / Open Lists)";
+	}
+}
 
 function newList()
 {
 	LMList = new List();
 	LMList.name = "New List";
+	editing = null;
 
 	var title = document.getElementById("ltitle");
 	ClearElement(title);
@@ -122,6 +165,62 @@ function newList()
 	title.innerHTML = LMList.name;
 
 	document.getElementById("ctlink").setAttribute("href", "javascript:startTitleEdit()");
+	window.location.hash = "";
+
+	UpdateLMListDisplay();
+}
+
+function doControlShow(id)
+{
+	if(editing != id)
+	{
+		document.getElementById("links" + String(id)).style.display = "inline";
+	}
+}
+
+function doControlHide(id)
+{
+	document.getElementById("links" + String(id)).style.display = "none";
+}
+
+function doUrgent(id)
+{
+	if(LMList.items[id].urgent)
+	{
+		LMList.items[id].urgent = false;
+	}
+	else
+	{
+		LMList.items[id].urgent = true;
+	}
+
+	UpdateLMListDisplay();
+}
+
+function doBold(id)
+{
+	if(LMList.items[id].bold)
+	{
+		LMList.items[id].bold = false;
+	}
+	else
+	{
+		LMList.items[id].bold = true;
+	}
+
+	UpdateLMListDisplay();
+}
+
+function doItalic(id)
+{
+	if(LMList.items[id].italic)
+	{
+		LMList.items[id].italic = false;
+	}
+	else
+	{
+		LMList.items[id].italic = true;
+	}
 
 	UpdateLMListDisplay();
 }
@@ -138,6 +237,8 @@ function moveUp(id)
 
 		LMList.items.move(oldindex, newindex);
 		UpdateLMListDisplay();
+
+		
 	}
 }
 
@@ -151,6 +252,8 @@ function moveDown(id)
 		
 		LMList.items.move(oldindex, newindex);
 		UpdateLMListDisplay();
+
+		
 	}
 }
 
@@ -223,8 +326,19 @@ function checkChange(id)
 {
 	var text = document.getElementById("text" + String(id)).innerHTML;
 	var completed = document.getElementById("check" + String(id)).checked;
+	var bold = LMList.items[id].bold;
+	var italic = LMList.items[id].italic;
+	var urgent = LMList.items[id].urgent;
 
 	EditLMListItem(id, text, completed);
+
+	LMList.items[id].bold = bold;
+	LMList.items[id].italic = italic;
+	LMList.items[id].urgent = urgent;
+
+	UpdateLMListDisplay()
+
+
 }
 
 function doEdit(id)
@@ -232,8 +346,21 @@ function doEdit(id)
 
 	var text = document.getElementById("edit" + String(id)).value;
 	var completed = document.getElementById("check" + String(id)).checked;
+	var bold = LMList.items[id].bold;
+	var italic = LMList.items[id].italic;
+	var urgent = LMList.items[id].urgent;
 
 	EditLMListItem(id, text, completed);
+
+	LMList.items[id].bold = bold;
+	LMList.items[id].italic = italic;
+	LMList.items[id].urgent = urgent;
+
+	UpdateLMListDisplay()
+
+
+
+	editing = null;
 
 	 //prevent form submission
 	 return false;
@@ -271,6 +398,8 @@ function startEdit(id)
 
 	span.appendChild(form);
 
+	editing = id;
+
 
 
 
@@ -280,8 +409,18 @@ function startEdit(id)
 
 if(typeof(Storage) !== "undefined") {
     // Code for localStorage/sessionStorage.
+    LSOpenListForm();
 } else {
     document.getElementById("lstorage").innerHTML = "<p><i>Local Storage or the fallback is not supported by your web browser.</i></p>";
 }
+
+var hash = window.location.hash.slice(1);
+//If the window hash is set to something, try to load it from local storage
+if(hash != "")
+{
+	LSOpenListFromKey(decodeURIComponent(hash));
+}
+
+
 </script>
 </html>

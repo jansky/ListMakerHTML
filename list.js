@@ -20,6 +20,9 @@ var ListItem = function(t, c)
 {
 	this.text = t;
 	this.completed = c;
+	this.bold = false;
+	this.italic = false;
+	this.urgent = false;
 }
 
 
